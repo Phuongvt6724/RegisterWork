@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "./firebase";
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue, set, runTransaction } from "firebase/database";
 import toast from 'react-hot-toast';
 
 const MAX_PEOPLE = 3;
@@ -147,12 +147,14 @@ function App() {
     }
   }, [selectedName]);
 
-  // Notification function using react-hot-toast
+  // Notification function - chỉ hiển thị lỗi và cảnh báo
   const showNotification = (message, type = 'info') => {
+    // Skip success notifications
+    if (type === 'success') {
+      return;
+    }
+    
     switch(type) {
-      case 'success':
-        toast.success(message);
-        break;
       case 'error':
         toast.error(message);
         break;
@@ -176,47 +178,79 @@ function App() {
     }
   };
 
-  const handleRegister = (dayIndex, shiftIndex) => {
+  const handleRegister = async (dayIndex, shiftIndex) => {
     if (!selectedName) {
       showNotification("Hãy chọn tên trước!", "warning");
       return;
     }
     
     const key = `day${dayIndex}-shift${shiftIndex}`;
-    const current = shifts[key] || [];
+    const shiftRef = ref(db, `shifts/${selectedWeek.id}/${key}`);
     
-    if (current.includes(selectedName)) {
-      showNotification("Bạn đã đăng ký ca này rồi!", "warning");
-      return;
+    try {
+      await runTransaction(shiftRef, (currentData) => {
+        const current = currentData || [];
+        
+        // Kiểm tra xem user đã đăng ký chưa
+        if (current.includes(selectedName)) {
+          // User đã đăng ký - không thay đổi gì, trả về data cũ
+          return current;
+        }
+        
+        // Kiểm tra xem ca đã full chưa (race condition protection)
+        if (current.length >= MAX_PEOPLE) {
+          // Ca đã đủ người - không thay đổi gì, trả về data cũ
+          return current;
+        }
+        
+        // Thêm user vào danh sách - transaction đảm bảo atomic
+        // Ai click trước thì được vào trước (first-come-first-served)
+        return [...current, selectedName];
+      });
+      
+      // Transaction thành công - UI sẽ tự update từ Firebase listener
+      
+    } catch {
+      // Transaction failed - có thể do network hoặc lỗi khác
+      showNotification("Có lỗi xảy ra, vui lòng thử lại!", "error");
     }
-    
-    if (current.length >= MAX_PEOPLE) {
-      showNotification("Ca này đã full!", "error");
-      return;
-    }
-    
-    const updated = [...current, selectedName];
-    set(ref(db, `shifts/${selectedWeek.id}/${key}`), updated);
-    showNotification("Đăng ký thành công!", "success");
   };
 
-  const handleCancel = (dayIndex, shiftIndex) => {
+  const handleCancel = async (dayIndex, shiftIndex) => {
+    console.log('🚫 Cancel clicked', { dayIndex, shiftIndex, selectedName });
+    
     if (!selectedName) {
       showNotification("Hãy chọn tên trước!", "warning");
       return;
     }
     
     const key = `day${dayIndex}-shift${shiftIndex}`;
-    const current = shifts[key] || [];
+    const shiftRef = ref(db, `shifts/${selectedWeek.id}/${key}`);
     
-    if (!current.includes(selectedName)) {
-      showNotification("Bạn chưa đăng ký ca này!", "warning");
-      return;
+    console.log('🚫 Starting cancel transaction', { key, selectedWeek: selectedWeek.id });
+    
+    try {
+      await runTransaction(shiftRef, (currentData) => {
+        const current = currentData || [];
+        console.log('🚫 Transaction data:', { current, selectedName, includes: current.includes(selectedName) });
+        
+        // Đơn giản hóa: chỉ filter user ra khỏi list
+        // Nếu user không có trong list thì filter vẫn trả về list cũ (không thay đổi gì)
+        const newList = current.filter(name => name !== selectedName);
+        
+        console.log('🚫 Filtered list:', { original: current, filtered: newList });
+        
+        // Luôn return newList, Firebase sẽ tự động so sánh và chỉ update nếu có thay đổi
+        return newList;
+      });
+      
+      console.log('🚫 Cancel transaction completed');
+      
+    } catch (error) {
+      console.log('🚫 Cancel transaction failed:', error);
+      // Chỉ hiển thị lỗi khi có network issues hoặc lỗi thật sự
+      showNotification("Có lỗi xảy ra, vui lòng thử lại!", "error");
     }
-    
-    const updated = current.filter(name => name !== selectedName);
-    set(ref(db, `shifts/${selectedWeek.id}/${key}`), updated);
-    showNotification("Hủy đăng ký thành công!", "success");
   };
 
   const handleEmployeeChange = (e) => {
@@ -236,7 +270,8 @@ function App() {
 
   const getShiftData = (dayIndex, shiftIndex) => {
     const key = `day${dayIndex}-shift${shiftIndex}`;
-    return shifts[key] || [];
+    const data = shifts[key] || [];
+    return data;
   };
 
   const isShiftFull = (dayIndex, shiftIndex) => {
@@ -245,7 +280,8 @@ function App() {
 
   const isUserRegistered = (dayIndex, shiftIndex) => {
     const shiftData = getShiftData(dayIndex, shiftIndex);
-    return selectedName && shiftData.includes(selectedName);
+    const isRegistered = selectedName && shiftData.includes(selectedName);
+    return isRegistered;
   };
 
   // Authentication handlers
@@ -283,7 +319,7 @@ function App() {
           });
         });
         set(ref(db, `shifts/${selectedWeek.id}`), resetShifts);
-        showNotification("Đã reset toàn bộ lịch làm việc!", "success");
+        // Không hiển thị thông báo thành công cho reset
       }
       setShowPasswordInput(false);
       setPassword("");

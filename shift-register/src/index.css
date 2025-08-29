@@ -603,7 +603,6 @@ body {
 
 .shift-cell.registered {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 2px solid #3b82f6;
 }
 
 .employee-list {
