@@ -301,7 +301,7 @@ function App() {
   };
 
   const handlePasswordSubmit = () => {
-    if (password === "h384") {
+    if (password === "start") {
       if (passwordMode === "open") {
         // Mở hệ thống và lưu tuần được chọn
         set(ref(db, "systemStatus/isOpen"), true);
