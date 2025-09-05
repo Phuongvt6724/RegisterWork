@@ -3,9 +3,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  padding: 20px;
 }
 
 .auth-card {
@@ -41,21 +38,27 @@
 }
 
 .system-status.open {
-  background: linear-gradient(45deg, #4CAF50, #8BC34A);
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
   color: white;
   box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
 }
 
 .system-status.closed {
-  background: linear-gradient(45deg, #f44336, #FF5722);
+  background: linear-gradient(45deg, #f44336, #ff5722);
   color: white;
   box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .auth-buttons {
@@ -201,13 +204,20 @@
   animation: waiting 1.4s infinite ease-in-out both;
 }
 
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
 
 @keyframes waiting {
-  0%, 80%, 100% { 
+  0%,
+  80%,
+  100% {
     transform: scale(0);
-  } 40% { 
+  }
+  40% {
     transform: scale(1);
   }
 }
@@ -234,13 +244,23 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* App Header Styles */
@@ -280,7 +300,10 @@
   align-items: center;
 }
 
-.system-control-btn, .logout-btn, .reset-btn {
+.system-control-btn,
+.logout-btn,
+.reset-btn,
+.view-schedule-btn {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -291,7 +314,10 @@
   transition: all 0.3s ease;
 }
 
-.system-control-btn:hover, .logout-btn:hover, .reset-btn:hover {
+.system-control-btn:hover,
+.logout-btn:hover,
+.reset-btn:hover,
+.view-schedule-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-1px);
@@ -317,34 +343,105 @@
   border-color: rgba(220, 53, 69, 0.7);
 }
 
+/* CSS cho nút xem lịch */
+.view-schedule-btn {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.view-schedule-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.7);
+}
+
+/* CSS cho overlay ScheduleTable */
+.schedule-table-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: auto;
+}
+
+.schedule-table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.schedule-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.schedule-table-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.close-schedule-btn {
+  background: #ff5722;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.close-schedule-btn:hover {
+  background: #d84315;
+  transform: scale(1.05);
+}
+
 /* Responsive cho authentication */
 @media (max-width: 768px) {
   .auth-card {
     padding: 30px 20px;
     margin: 10px;
   }
-  
+
   .auth-card h1 {
     font-size: 20px;
   }
-  
+
   .auth-btn {
     padding: 12px 24px;
     font-size: 16px;
   }
-  
+
   .app-header {
     flex-direction: column;
     gap: 15px;
     text-align: center;
   }
-  
+
   .header-right {
     flex-direction: column;
     width: 100%;
   }
-  
-  .system-control-btn, .logout-btn, .reset-btn {
+
+  .system-control-btn,
+  .logout-btn,
+  .reset-btn,
+  .view-schedule-btn {
     width: 100%;
     padding: 10px;
   }
@@ -358,10 +455,13 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
 }
 
 .container {
@@ -607,6 +707,7 @@ body {
 
 .employee-list {
   min-height: 40px;
+  max-width: 149px;
   flex-grow: 1;
 }
 
@@ -614,7 +715,7 @@ body {
   display: inline-block;
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
-  padding: 4px 8px;
+  padding: 3px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
   margin: 2px;
@@ -626,14 +727,14 @@ body {
   box-shadow: 0 0 0 2px #fbbf24;
 }
 
-.container-fluid{
+.container-fluid {
   height: 100%;
   display: flex;
   flex-direction: column;
   padding-bottom: 5px;
 }
 
-.box-btn{
+.box-btn {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -808,7 +909,7 @@ body {
   font-size: 0.8rem;
 }
 
-.box-btn-mobile{
+.box-btn-mobile {
   padding: 0 2px;
 }
 
@@ -857,15 +958,15 @@ body {
   .schedule-table {
     font-size: 0.9rem;
   }
-  
+
   .schedule-table td {
     height: 100px;
   }
-  
+
   .day-header {
     min-width: 120px;
   }
-  
+
   .employee-tag {
     font-size: 0.75rem;
     padding: 3px 6px;
@@ -878,44 +979,43 @@ body {
     margin: 10px;
     border-radius: 15px;
   }
-  
+
   .content {
     padding: 20px;
   }
-  
+
   .header {
     padding: 20px;
   }
-  
+
   .header h1 {
     font-size: 2rem;
   }
-  
+
   .schedule-table {
     font-size: 0.8rem;
   }
-  
+
   .schedule-table td {
     height: 80px;
     padding: 8px;
   }
-  
+
   .day-header {
     min-width: 100px;
-    padding: 15px 8px;
   }
-  
+
   .employee-tag {
     font-size: 0.7rem;
     padding: 2px 6px;
     margin: 1px;
   }
-  
+
   .register-btn {
     font-size: 0.8rem;
     padding: 6px 8px;
   }
-  
+
   .shift-status {
     font-size: 0.65rem;
     padding: 1px 4px;
@@ -928,38 +1028,38 @@ body {
   .desktop-table {
     display: none;
   }
-  
+
   .mobile-table {
     display: block;
   }
-  
+
   .container {
     margin: 10px;
     border-radius: 15px;
   }
-  
+
   .content {
     padding: 20px;
   }
-  
+
   .header {
     padding: 20px;
   }
-  
+
   .header h1 {
     font-size: 2rem;
   }
-  
+
   .employee-selector {
     padding: 15px;
     margin-bottom: 20px;
   }
-  
+
   .employee-selector label {
     font-size: 1rem;
     margin-bottom: 8px;
   }
-  
+
   .employee-selector select {
     padding: 12px;
     font-size: 0.9rem;
@@ -971,70 +1071,70 @@ body {
   body {
     padding: 10px;
   }
-  
+
   .container {
     margin: 0;
     border-radius: 10px;
     min-width: 320px;
   }
-  
+
   .header {
     padding: 15px;
   }
-  
+
   .header h1 {
     font-size: 1.5rem;
     margin-bottom: 8px;
   }
-  
+
   .header p {
     font-size: 1rem;
   }
-  
+
   .content {
     padding: 15px;
   }
-  
+
   .employee-selector {
     padding: 12px;
     margin-bottom: 15px;
   }
-  
+
   /* Mobile table adjustments for small screens */
   .mobile-schedule-table th {
     padding: 10px 4px;
     font-size: 0.8rem;
   }
-  
+
   .mobile-schedule-table td {
     height: 80px;
   }
-  
+
   .day-cell-mobile {
     width: 70px;
     font-size: 0.8rem;
     padding: 8px 3px;
   }
-  
+
   .shift-cell-mobile {
     padding: 6px;
   }
-  
+
   .employee-list-mobile {
     min-height: 30px;
   }
-  
+
   .employee-tag-mobile {
     font-size: 0.65rem;
     padding: 1px 4px;
     margin-bottom: 3px;
   }
-  
+
   .register-btn-mobile {
     padding: 4px;
     font-size: 0.75rem;
   }
-  
+
   .shift-status-mobile {
     font-size: 0.55rem;
     padding: 1px 3px;
@@ -1044,4 +1144,580 @@ body {
 .status-full {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.calendar-container {
+  width: fit-content;
+  border-collapse: collapse;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: fixed;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  left: 0;
+  top: 0;
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 98;
+  }
+
+  table {
+    background: #8ed8d9;
+    border-collapse: collapse;
+    z-index: 100;
+    max-width: 1200px;
+    th {
+      border: 1px solid black;
+    }
+  }
+
+  .header-row .header-cell {
+    padding: 15px 0;
+    font-size: 1.7rem;
+  }
+
+  thead th.day-header {
+    background-color: #49bbc6;
+    color: black;
+    padding: 7px;
+    font-weight: 700;
+    border-right: 1px solid #dee2e6;
+    font-size: 17px;
+    position: sticky;
+    top: 0;
+    border: 1px solid black;
+  }
+
+  tbody tr:nth-child(1) td {
+    background: #fed665;
+  }
+
+  tbody tr:nth-child(2) td {
+    background: #fbe399;
+  }
+
+  tbody tr:nth-child(3) td {
+    background: #fef1cf;
+  }
+
+  .ca-cell {
+    background: #49bbc6 !important;
+    color: black;
+    font-weight: bold;
+    vertical-align: middle;
+    padding: 15px;
+  }
+
+  .ca-title {
+    display: block;
+    font-size: 1.2em;
+  }
+
+  .ca-time {
+    display: block;
+    font-size: 0.9em;
+    color: black;
+  }
+
+  tbody td {
+    border: 1px solid #dee2e6;
+    text-align: center;
+    vertical-align: top;
+    line-height: 1.6;
+    transition: background-color 0.3s ease;
+    border: 1px solid black;
+    font-weight: 600;
+  }
+
+  .name-list {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .name-item {
+    display: block;
+    padding: 5px 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+    min-height: 35px;
+  }
+
+  .name-item:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
+
+  table th:last-child,
+  table td:last-child {
+    border: 1px solid black;
+  }
+}
+
+/* CSS cho nút xem lịch */
+.view-schedule-btn {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.5);
+  margin-right: 10px;
+}
+
+@media (max-width: 1200px) {
+  .view-schedule-btn {
+    display: none;
+  }
+}
+
+.view-schedule-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.7);
+}
+
+/* CSS cho overlay ScheduleTable */
+.schedule-table-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: auto;
+}
+
+.schedule-table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.schedule-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.schedule-table-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.close-schedule-btn {
+  background: #ff5722;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.close-schedule-btn:hover {
+  background: #d84315;
+  transform: scale(1.05);
+}
+
+.calendar-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Arial', sans-serif;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: tableSlideIn 0.5s ease-out 0.3s forwards;
+}
+
+@keyframes tableSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-container .header-cell {
+  background: #90D8DC;
+  padding: 15px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.calendar-container .day-header {
+  background: #49BBC6;
+  color: white;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid black;
+}
+
+.calendar-container .ca-cell {
+  background: #f8f9fa;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid black;
+  min-width: 100px;
+}
+
+.calendar-container .ca-title {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.calendar-container .name-list {
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-container .name-item {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.calendar-container .empty-slot {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 20px 8px;
+}
+
+.calendar-container .shift-status {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 4px;
+  margin-top: 5px;
+  border-radius: 3px;
+}
+
+.calendar-container .shift-status.full {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.calendar-container .shift-status.available {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+@media (max-width: 768px) {
+  .schedule-table-container {
+    padding: 10px;
+    max-width: 98vw;
+    max-height: 98vh;
+  }
+  
+  .schedule-table-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .schedule-table-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .calendar-container .name-list {
+    min-height: 60px;
+    font-size: 0.8rem;
+  }
+  
+  .calendar-container .name-item {
+    font-size: 0.75rem;
+  }
+}
+
+/* Responsive cho Schedule Table Overlay */
+@media (max-width: 768px) {
+  .schedule-table-container {
+    padding: 10px;
+    max-width: 98vw;
+    max-height: 98vh;
+  }
+  
+  .schedule-table-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .schedule-table-header h2 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-table-container {
+    padding: 5px;
+    margin: 5px;
+  }
+  
+  .schedule-table-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .close-schedule-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Styling cho phần chọn vai trò */
+.role-assignment-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 2px solid #e5e7eb;
+}
+
+.role-assignment-section h3 {
+  margin: 0 0 15px 0;
+  color: #374151;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.role-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.role-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-selector label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.role-selector select {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.3s ease;
+  color: #374151;
+}
+
+.role-selector select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.role-summary {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.role-badge.ket {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
+.role-badge.key {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.schedule-content {
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.close-button-container {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid #e0e0e0;
+}
+
+/* Responsive cho role assignment */
+@media (max-width: 768px) {
+  .role-controls {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .role-assignment-section {
+    padding: 15px;
+  }
+  
+  .role-assignment-section h3 {
+    font-size: 1.1rem;
+  }
+  
+  .role-selector select {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .role-summary {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .role-badge {
+    width: 100%;
+    max-width: 200px;
+    padding: 10px;
+  }
+}
+
+/* Drag & Drop Styles - Updated for dragging buttons to names */
+.role-assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.drag-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.drag-button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: grab;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.drag-button:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.key-button {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
+.key-button:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.ket-button {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  color: white;
+}
+
+.ket-button:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+.instruction-text {
+  color: #64748b;
+  font-style: italic;
+  text-align: center;
+  margin: 10px 0 20px 0;
+  padding: 10px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.name-item.droppable {
+  transition: all 0.2s ease;
+  display: inline-block;
+  position: relative;
+}
+
+/* Hiệu ứng khi đang drag over */
+.name-item.droppable.drag-over {
+  background: #dbeafe;
+  border: 2px dashed #3b82f6;
+  transform: scale(1.1);
+}
+
+.employee-roles {
+  font-size: 0.8rem;
+  color: blue;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-left: 1px;
+}
+
+/* Xóa các styles cũ không cần thiết */
+.day-selector, .drag-drop-container, .drop-zone, .assigned-employees, 
+.assigned-employee, .remove-btn, .drop-hint, .name-item.draggable {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .role-assignment-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .drag-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .drag-button {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
 }
