@@ -6,6 +6,16 @@ import ScheduleTable from "./ScheduleTable";
 
 const MAX_PEOPLE = 3;
 
+// Hàm mã hóa mật khẩu bằng SHA-256
+const hashPassword = async (password) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+};
+
 // Hàm tạo danh sách tuần
 const generateWeeks = () => {
   const weeks = [];
@@ -107,11 +117,19 @@ function App() {
   const [isLoading, setIsLoading] = useState(true); // Loading state cho Firebase
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
-  const [passwordMode, setPasswordMode] = useState(""); // "open", "close", "reset"
+  const [passwordMode, setPasswordMode] = useState(""); // "open", "close", "reset", "change"
   const [showRestoreMessage, _setShowRestoreMessage] = useState(false);
+  const [adminPasswordHash, setAdminPasswordHash] = useState(""); // Hash mật khẩu từ Firebase
+  const [newPassword, setNewPassword] = useState(""); // Mật khẩu mới khi đổi mật khẩu
+  const [confirmPassword, setConfirmPassword] = useState(""); // Xác nhận mật khẩu mới
 
   // Khởi tạo dữ liệu shifts cho tất cả ngày và ca
   useEffect(() => {
+    onValue(ref(db, "systemConfig/adminPasswordHash"), (snapshot) => {
+      const hash = snapshot.val() || "";
+      setAdminPasswordHash(hash);
+    });
+
     // Lắng nghe dữ liệu employees
     onValue(ref(db, "employees"), (snapshot) => {
       const data = snapshot.val() || [];
@@ -379,33 +397,84 @@ function App() {
     setPasswordMode("reset");
   };
 
-  const handlePasswordSubmit = () => {
-    if (password === "start") {
-      if (passwordMode === "open") {
-        // Mở hệ thống và lưu tuần được chọn
-        set(ref(db, "systemStatus/isOpen"), true);
-        set(ref(db, "systemStatus/selectedWeek"), selectedWeek.id);
-      } else if (passwordMode === "close") {
-        // Đóng hệ thống
-        set(ref(db, "systemStatus/isOpen"), false);
-      } else if (passwordMode === "reset") {
-        // Reset lịch làm việc - xóa toàn bộ shifts cho tuần hiện tại
-        const resetShifts = {};
-        DAYS.forEach((day, dayIndex) => {
-          SHIFTS.forEach((shift, shiftIndex) => {
-            const key = `day${dayIndex}-shift${shiftIndex}`;
-            resetShifts[key] = [];
-          });
-        });
-        set(ref(db, `shifts/${selectedWeek.id}`), resetShifts);
-        // Không hiển thị thông báo thành công cho reset
+  const handleChangePassword = () => {
+    setShowPasswordInput(true);
+    setPasswordMode("change");
+    setPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  const handlePasswordSubmit = async () => {
+    try {
+      if (passwordMode === "change") {
+        // Logic đổi mật khẩu
+        if (newPassword !== confirmPassword) {
+          showNotification("Mật khẩu xác nhận không khớp!", "error");
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          showNotification("Mật khẩu mới phải có ít nhất 6 ký tự!", "error");
+          return;
+        }
+
+        // Kiểm tra mật khẩu cũ
+        const inputPasswordHash = await hashPassword(password);
+        if (inputPasswordHash !== adminPasswordHash) {
+          showNotification("Mật khẩu cũ không chính xác!", "error");
+          setPassword("");
+          return;
+        }
+
+        // Hash mật khẩu mới và lưu vào Firebase
+        const newPasswordHash = await hashPassword(newPassword);
+        await set(ref(db, "systemConfig/adminPasswordHash"), newPasswordHash);
+        
+        showNotification("Đổi mật khẩu thành công!", "success");
+        setShowPasswordInput(false);
+        setPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordMode("");
+        return;
       }
-      setShowPasswordInput(false);
-      setPassword("");
-      setPasswordMode("");
-    } else {
-      showNotification("Mật khẩu không đúng!", "error");
-      setPassword("");
+      
+      // Logic xác thực mật khẩu cho các chức năng khác
+      const inputPasswordHash = await hashPassword(password);
+      
+      if (inputPasswordHash === adminPasswordHash) {
+        if (passwordMode === "open") {
+          // Mở hệ thống và lưu tuần được chọn
+          set(ref(db, "systemStatus/isOpen"), true);
+          set(ref(db, "systemStatus/selectedWeek"), selectedWeek.id);
+          showNotification("Hệ thống đã được mở!", "success");
+        } else if (passwordMode === "close") {
+          // Đóng hệ thống
+          set(ref(db, "systemStatus/isOpen"), false);
+          showNotification("Hệ thống đã được đóng!", "success");
+        } else if (passwordMode === "reset") {
+          // Reset lịch làm việc - xóa toàn bộ shifts cho tuần hiện tại
+          const resetShifts = {};
+          DAYS.forEach((day, dayIndex) => {
+            SHIFTS.forEach((shift, shiftIndex) => {
+              const key = `day${dayIndex}-shift${shiftIndex}`;
+              resetShifts[key] = [];
+            });
+          });
+          set(ref(db, `shifts/${selectedWeek.id}`), resetShifts);
+          showNotification("Lịch làm việc đã được reset!", "success");
+        }
+        setShowPasswordInput(false);
+        setPassword("");
+        setPasswordMode("");
+      } else {
+        showNotification("Mật khẩu không chính xác!", "error");
+        setPassword("");
+      }
+    } catch (error) {
+      console.error("Lỗi xác thực mật khẩu:", error);
+      showNotification("Có lỗi xảy ra khi xác thực!", "error");
     }
   };
 
@@ -442,7 +511,9 @@ function App() {
               ? "Chọn tuần và nhập mật khẩu để mở hệ thống"
               : passwordMode === "close"
               ? "Nhập mật khẩu để đóng hệ thống"
-              : "Nhập mật khẩu để reset toàn bộ lịch làm việc"}
+              : passwordMode === "reset"
+              ? "Nhập mật khẩu để reset toàn bộ lịch làm việc"
+              : "Đổi mật khẩu quản trị"}
           </p>
 
           {passwordMode === "open" && (
@@ -465,14 +536,40 @@ function App() {
           )}
 
           <div className="password-input">
-            <input
-              type="password"
-              placeholder="Nhập mật khẩu..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handlePasswordSubmit()}
-            />
-            <button onClick={handlePasswordSubmit}>Xác nhận</button>
+            {passwordMode === "change" ? (
+              <>
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu cũ..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu mới..."
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <input
+                  type="password"
+                  placeholder="Xác nhận mật khẩu mới..."
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                />
+              </>
+            ) : (
+              <input
+                type="password"
+                placeholder="Nhập mật khẩu..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handlePasswordSubmit()}
+              />
+            )}
+            <button onClick={handlePasswordSubmit}>
+              {passwordMode === "change" ? "Đổi mật khẩu" : "Xác nhận"}
+            </button>
           </div>
 
           <button className="back-btn" onClick={handleCancelPassword}>
@@ -497,6 +594,9 @@ function App() {
           <div className="auth-buttons">
             <button className="auth-btn manager-btn" onClick={handleOpenSystem}>
               🔓 Mở Hệ Thống
+            </button>
+            <button className="auth-btn change-password-btn" onClick={handleChangePassword}>
+              🔑 Đổi Mật Khẩu
             </button>
           </div>
         </div>

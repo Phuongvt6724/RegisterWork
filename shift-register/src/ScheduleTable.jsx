@@ -4,7 +4,6 @@ import { db } from "./firebase";
 import toast from "react-hot-toast";
 
 const ScheduleTable = ({ DAYS, SHIFTS, getShiftData, setShowScheduleTable, selectedWeek }) => {
-  const [selectedDay, setSelectedDay] = useState(0);
   const [dailyRoles, setDailyRoles] = useState({});
   const [draggedEmployee, setDraggedEmployee] = useState(null);
 
