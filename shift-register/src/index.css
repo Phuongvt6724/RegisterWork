@@ -15,6 +15,17 @@
   backdrop-filter: blur(10px);
 }
 
+
+.auto-register-btn{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background: transparent;
+  border: none;
+}
+
 .auth-card h1 {
   color: #333;
   margin-bottom: 10px;

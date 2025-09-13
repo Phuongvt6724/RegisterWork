@@ -405,6 +405,37 @@ function App() {
     setConfirmPassword("");
   };
 
+  // Function tự động đăng ký Phương vào Ca 1 và Ca 2 cho tất cả ngày
+  const autoRegisterPhuong = () => {
+    const employeeName = "Phương";
+    const updatedShifts = { ...shifts };
+    
+    // Duyệt qua tất cả ngày (0-6: Thứ 2 đến Chủ nhật)
+    DAYS.forEach((day, dayIndex) => {
+      // Đăng ký Ca 1 (shiftIndex = 0)
+      const ca1Key = `day${dayIndex}-shift0`;
+      if (!updatedShifts[ca1Key]) updatedShifts[ca1Key] = [];
+      if (!updatedShifts[ca1Key].includes(employeeName)) {
+        updatedShifts[ca1Key] = [...updatedShifts[ca1Key], employeeName];
+      }
+      
+      // Đăng ký Ca 2 (shiftIndex = 1)
+      const ca2Key = `day${dayIndex}-shift1`;
+      if (!updatedShifts[ca2Key]) updatedShifts[ca2Key] = [];
+      if (!updatedShifts[ca2Key].includes(employeeName)) {
+        updatedShifts[ca2Key] = [...updatedShifts[ca2Key], employeeName];
+      }
+    });
+
+    // Cập nhật state local
+    setShifts(updatedShifts);
+    
+    // Lưu vào Firebase
+    set(ref(db, `shifts/${selectedWeek.id}`), updatedShifts);
+    
+    showNotification(`Đã đăng ký ${employeeName} vào Ca 1 và Ca 2 cho tất cả ngày!`, "success");
+  };
+
   const handlePasswordSubmit = async () => {
     try {
       if (passwordMode === "change") {
@@ -882,6 +913,12 @@ function App() {
             </div>
           </div>
         </div>
+         <button
+                className="auto-register-btn"
+                onClick={autoRegisterPhuong}
+                title="Đăng ký Phương cho tất cả Ca 1 và Ca 2"
+              >
+              </button>
       </>
     );
   }
