@@ -305,11 +305,13 @@
 }
 
 .header-right {
+  margin-top: 8px;
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
+.manage-employees-btn,
 .system-control-btn,
 .logout-btn,
 .reset-btn,
@@ -1732,5 +1734,337 @@ body {
     min-width: 120px;
     padding: 10px 15px;
     font-size: 0.9rem;
+  }
+}
+
+/* Employee Management Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+.employee-management-modal {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.add-employee-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  border-left: 4px solid #0284c7;
+}
+
+.add-employee-section h3 {
+  margin: 0 0 15px 0;
+  color: #0c4a6e;
+  font-size: 1.2rem;
+}
+
+.add-employee-form {
+  display: flex;
+  gap: 10px;
+}
+
+.add-employee-form input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.add-employee-form input:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.add-btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.add-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.employee-list-section h3 {
+  margin: 0 0 15px 0;
+  color: #374151;
+  font-size: 1.2rem;
+}
+
+.employee-management-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.no-employees {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 40px 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.employee-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.employee-item:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.employee-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.employee-name {
+  font-weight: 500;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.employee-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+  background: #f3f4f6;
+  transform: scale(1.1);
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+.edit-employee-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+
+}
+
+.edit-employee-form input {
+  padding: 8px 12px;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.save-btn {
+  border: 1px solid #10b981;
+  border-radius: 7px;
+  color: #059669;
+  padding: 0 12px
+}
+
+.save-btn:hover {
+  background: #ecfdf5;
+  transform: scale(1.1);
+}
+
+/* Manage employees button styles */
+.manage-employees-btn {
+  background: rgba(139, 69, 19, 0.2);
+  border-color: rgba(139, 69, 19, 0.5);
+}
+
+.manage-employees-btn:hover {
+  background: rgba(139, 69, 19, 0.3);
+  border-color: rgba(139, 69, 19, 0.7);
+}
+
+.auth-btn.manage-employees-btn {
+  background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+}
+
+.auth-btn.manage-employees-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(139, 69, 19, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive for employee management modal */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .modal-header {
+    padding: 15px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  .add-employee-section {
+    padding: 15px;
+  }
+  
+  .add-employee-form {
+    flex-direction: column;
+  }
+  
+  .employee-item {
+    padding: 10px;
+  }
+  
+  .employee-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .employee-actions {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .modal-header {
+    padding: 12px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .add-employee-section h3 {
+    font-size: 1.1rem;
+  }
+  
+  .employee-list-section h3 {
+    font-size: 1.1rem;
   }
 }

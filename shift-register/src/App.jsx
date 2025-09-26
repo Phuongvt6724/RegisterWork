@@ -117,11 +117,17 @@ function App() {
   const [isLoading, setIsLoading] = useState(true); // Loading state cho Firebase
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
-  const [passwordMode, setPasswordMode] = useState(""); // "open", "close", "reset", "change"
+  const [passwordMode, setPasswordMode] = useState(""); // "open", "close", "reset", "change", "manage-employees"
   const [showRestoreMessage, _setShowRestoreMessage] = useState(false);
   const [adminPasswordHash, setAdminPasswordHash] = useState(""); // Hash mật khẩu từ Firebase
   const [newPassword, setNewPassword] = useState(""); // Mật khẩu mới khi đổi mật khẩu
   const [confirmPassword, setConfirmPassword] = useState(""); // Xác nhận mật khẩu mới
+
+  // Employee management states
+  const [showEmployeeManagement, setShowEmployeeManagement] = useState(false);
+  const [newEmployeeName, setNewEmployeeName] = useState("");
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editingName, setEditingName] = useState("");
 
   // Khởi tạo dữ liệu shifts cho tất cả ngày và ca
   useEffect(() => {
@@ -405,6 +411,122 @@ function App() {
     setConfirmPassword("");
   };
 
+  const handleManageEmployees = () => {
+    setShowPasswordInput(true);
+    setPasswordMode("manage-employees");
+    setPassword("");
+  };
+
+  // Employee management functions
+  const handleAddEmployee = async () => {
+    if (!newEmployeeName.trim()) {
+      showNotification("Tên nhân viên không được để trống!", "error");
+      return;
+    }
+
+    if (employees.includes(newEmployeeName.trim())) {
+      showNotification("Nhân viên này đã tồn tại!", "error");
+      return;
+    }
+
+    const updatedEmployees = [...employees, newEmployeeName.trim()];
+    setEmployees(updatedEmployees);
+    await set(ref(db, "employees"), updatedEmployees);
+    setNewEmployeeName("");
+    showNotification("Đã thêm nhân viên mới!", "success");
+  };
+
+  const handleEditEmployee = (index) => {
+    setEditingIndex(index);
+    setEditingName(employees[index]);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingName.trim()) {
+      showNotification("Tên nhân viên không được để trống!", "error");
+      return;
+    }
+
+    if (employees.includes(editingName.trim()) && editingName.trim() !== employees[editingIndex]) {
+      showNotification("Tên nhân viên này đã tồn tại!", "error");
+      return;
+    }
+
+    const oldName = employees[editingIndex];
+    const newName = editingName.trim();
+    
+    // Cập nhật danh sách nhân viên
+    const updatedEmployees = [...employees];
+    updatedEmployees[editingIndex] = newName;
+    setEmployees(updatedEmployees);
+    await set(ref(db, "employees"), updatedEmployees);
+
+    // Cập nhật tên trong lịch làm việc nếu có
+    const currentShifts = { ...shifts };
+    let hasChanges = false;
+    
+    Object.keys(currentShifts).forEach(key => {
+      if (currentShifts[key].includes(oldName)) {
+        const index = currentShifts[key].indexOf(oldName);
+        currentShifts[key][index] = newName;
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      setShifts(currentShifts);
+      await set(ref(db, `shifts/${selectedWeek.id}`), currentShifts);
+    }
+
+    // Cập nhật selectedName nếu đang chọn nhân viên này
+    if (selectedName === oldName) {
+      setSelectedName(newName);
+    }
+
+    setEditingIndex(-1);
+    setEditingName("");
+    showNotification("Đã cập nhật tên nhân viên!", "success");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(-1);
+    setEditingName("");
+  };
+
+  const handleDeleteEmployee = async (index) => {
+    const employeeName = employees[index];
+    
+    if (window.confirm(`Bạn có chắc muốn xóa nhân viên "${employeeName}"? Điều này sẽ xóa họ khỏi tất cả ca làm việc.`)) {
+      // Xóa khỏi danh sách nhân viên
+      const updatedEmployees = employees.filter((_, i) => i !== index);
+      setEmployees(updatedEmployees);
+      await set(ref(db, "employees"), updatedEmployees);
+
+      // Xóa khỏi lịch làm việc
+      const currentShifts = { ...shifts };
+      let hasChanges = false;
+      
+      Object.keys(currentShifts).forEach(key => {
+        if (currentShifts[key].includes(employeeName)) {
+          currentShifts[key] = currentShifts[key].filter(name => name !== employeeName);
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        setShifts(currentShifts);
+        await set(ref(db, `shifts/${selectedWeek.id}`), currentShifts);
+      }
+
+      // Clear selectedName nếu đang chọn nhân viên này
+      if (selectedName === employeeName) {
+        setSelectedName("");
+      }
+
+      showNotification("Đã xóa nhân viên!", "success");
+    }
+  };
+
   // Function tự động đăng ký Phương vào Ca 1 và Ca 2 cho tất cả ngày
   const autoRegisterPhuong = () => {
     const employeeName = "Phương";
@@ -495,6 +617,10 @@ function App() {
           });
           set(ref(db, `shifts/${selectedWeek.id}`), resetShifts);
           showNotification("Lịch làm việc đã được reset!", "success");
+        } else if (passwordMode === "manage-employees") {
+          // Mở modal quản lý nhân viên
+          setShowEmployeeManagement(true);
+          showNotification("Đã xác thực! Bạn có thể quản lý nhân viên.", "success");
         }
         setShowPasswordInput(false);
         setPassword("");
@@ -544,6 +670,8 @@ function App() {
               ? "Nhập mật khẩu để đóng hệ thống"
               : passwordMode === "reset"
               ? "Nhập mật khẩu để reset toàn bộ lịch làm việc"
+              : passwordMode === "manage-employees"
+              ? "Nhập mật khẩu để quản lý danh sách nhân viên"
               : "Đổi mật khẩu quản trị"}
           </p>
 
@@ -629,6 +757,9 @@ function App() {
             <button className="auth-btn change-password-btn" onClick={handleChangePassword}>
               🔑 Đổi Mật Khẩu
             </button>
+            {/* <button className="auth-btn manage-employees-btn" onClick={handleManageEmployees}>
+              👥 Quản Lý Nhân Viên
+            </button> */}
           </div>
         </div>
       </div>
@@ -660,6 +791,20 @@ function App() {
             </div>
 
             <div className="header-right">
+              {/* <button
+                className="auto-register-btn"
+                onClick={autoRegisterPhuong}
+                title="Đăng ký Phương cho tất cả Ca 1 và Ca 2"
+              >
+                🚀 Đăng Ký Phương
+              </button> */}
+              <button
+                className="manage-employees-btn"
+                onClick={handleManageEmployees}
+                title="Quản lý danh sách nhân viên"
+              >
+                👥 Quản Lý NV
+              </button>
               <button
                 className="view-schedule-btn"
                 onClick={() => setShowScheduleTable(true)}
@@ -912,6 +1057,99 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/* Employee Management Modal */}
+          {showEmployeeManagement && (
+            <div className="modal-overlay">
+              <div className="modal-content employee-management-modal">
+                <div className="modal-header">
+                  <h2>👥 Quản Lý Nhân Viên</h2>
+                  <button
+                    className="modal-close-btn"
+                    onClick={() => setShowEmployeeManagement(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="modal-body">
+                  {/* Add new employee */}
+                  <div className="add-employee-section">
+                    <h3>➕ Thêm Nhân Viên Mới</h3>
+                    <div className="add-employee-form">
+                      <input
+                        type="text"
+                        placeholder="Nhập tên nhân viên..."
+                        value={newEmployeeName}
+                        onChange={(e) => setNewEmployeeName(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && handleAddEmployee()}
+                      />
+                      <button className="add-btn" onClick={handleAddEmployee}>
+                        Thêm
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Employee list */}
+                  <div className="employee-list-section">
+                    <h3>📋 Danh Sách Nhân Viên ({employees.length})</h3>
+                    <div className="employee-management-list">
+                      {employees.length === 0 ? (
+                        <p className="no-employees">Chưa có nhân viên nào</p>
+                      ) : (
+                        employees.map((employee, index) => (
+                          <div key={index} className="employee-item">
+                            {editingIndex === index ? (
+                              <div className="edit-employee-form">
+                                <input
+                                  type="text"
+                                  value={editingName}
+                                  onChange={(e) => setEditingName(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === "Enter") handleSaveEdit();
+                                    if (e.key === "Escape") handleCancelEdit();
+                                  }}
+                                  autoFocus
+                                />
+                                <div className="edit-buttons">
+                                  <button className="save-btn" onClick={handleSaveEdit}>
+                                    ✓
+                                  </button>
+                                  <button className="cancel-btn" onClick={handleCancelEdit}>
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="employee-display">
+                                <span className="employee-name">{employee}</span>
+                                <div className="employee-actions">
+                                  <button
+                                    className="edit-btn"
+                                    onClick={() => handleEditEmployee(index)}
+                                    title="Sửa tên"
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button
+                                    className="delete-btn"
+                                    onClick={() => handleDeleteEmployee(index)}
+                                    title="Xóa nhân viên"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
          <button
                 className="auto-register-btn"
