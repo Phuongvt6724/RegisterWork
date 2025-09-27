@@ -1151,12 +1151,12 @@ function App() {
             </div>
           )}
         </div>
-         <button
+         {/* <button
                 className="auto-register-btn"
                 onClick={autoRegisterPhuong}
                 title="Đăng ký Phương cho tất cả Ca 1 và Ca 2"
               >
-              </button>
+              </button> */}
       </>
     );
   }
